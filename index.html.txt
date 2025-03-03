@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urine LH Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Urine LH Sample Quantification Report</h2>
+        <form id="reportForm">
+            <label>Patient Name: <input type="text" id="name" required></label><br>
+            <label>PIN Code: <input type="text" id="pin"></label><br>
+            <label>Age: <input type="number" id="age"></label><br>
+            <label>Sex: <input type="text" id="sex"></label><br>
+            <button type="button" onclick="generateReport()">Generate Report</button>
+        </form>
+
+        <div id="report" style="display:none;">
+            <table>
+                <tr>
+                    <td><span class="bold">Patient Name:</span> <span id="r_name"></span></td>
+                    <td><span class="bold">Date & Time:</span></td>
+                </tr>
+                <tr>
+                    <td><span class="bold">PIN Code:</span> <span id="r_pin"></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="bold">Age:</span> <span id="r_age"></span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><span class="bold">Sex:</span> <span id="r_sex"></span></td>
+                    <td></td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <th>Investigation</th>
+                    <th>Observed Value</th>
+                    <th>Unit</th>
+                    <th>Biological Reference Interval</th>
+                </tr>
+                <tr>
+                    <td>LH (Leutinizing Hormone)</td>
+                    <td>40-45</td>
+                    <td>mIU/ml</td>
+                    <td>Normal Menstruating Women: <10<br>Pre-Ovulatory Phase: 10-25<br>LH Surge (Ovulation): 25-40+<br>Luteal Phase: <10</td>
+                </tr>
+            </table>
+            <p><span class="bold">LH % Found:</span> 100%</p>
+            <p><span class="bold">Fertility Level Detected:</span> High</p>
+            <p><span class="bold">Ovulation Prediction:</span> 12-24 Hrs</p>
+        </div>
+    </div>
+
+    <script>
+        function generateReport() {
+            document.getElementById("r_name").innerText = document.getElementById("name").value;
+            document.getElementById("r_pin").innerText = document.getElementById("pin").value;
+            document.getElementById("r_age").innerText = document.getElementById("age").value;
+            document.getElementById("r_sex").innerText = document.getElementById("sex").value;
+            document.getElementById("report").style.display = "block";
+        }
+    </script>
+</body>
+</html>
