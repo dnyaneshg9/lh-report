@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Urine LH Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,36 +34,55 @@
         .bold {
             font-weight: bold;
         }
+        .hidden {
+            display: none;
+        }
+        .instructions {
+            background: #e7f3fe;
+            padding: 10px;
+            border-left: 5px solid #2196F3;
+            margin-bottom: 20px;
+        }
+        input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Urine LH Sample Quantification Report</h2>
+
+        <div class="instructions">
+            <p><strong>Instructions:</strong></p>
+            <ul>
+                <li>Enter the patient's name and age.</li>
+                <li>The gender is automatically set to Female.</li>
+                <li>Enter the observed LH value and LH percentage.</li>
+                <li>Click "Generate Report" to view the details.</li>
+                <li>Click "Download Report" to save it as a PDF.</li>
+            </ul>
+        </div>
+
         <form id="reportForm">
             <label>Patient Name: <input type="text" id="name" required></label><br>
-            <label>PIN Code: <input type="text" id="pin"></label><br>
-            <label>Age: <input type="number" id="age"></label><br>
-            <label>Sex: <input type="text" id="sex"></label><br>
+            <label>Age: <input type="number" id="age" required></label><br>
+            <label>Observed LH Value: <input type="number" id="lh_value" placeholder="Enter LH Value"></label><br>
+            <label>LH Percentage: <input type="text" id="lh_percentage" placeholder="Enter LH %"></label><br>
             <button type="button" onclick="generateReport()">Generate Report</button>
         </form>
 
-        <div id="report" style="display:none;">
+        <div id="report" class="hidden">
+            <h3>Patient Report</h3>
             <table>
                 <tr>
                     <td><span class="bold">Patient Name:</span> <span id="r_name"></span></td>
-                    <td><span class="bold">Date & Time:</span></td>
-                </tr>
-                <tr>
-                    <td><span class="bold">PIN Code:</span> <span id="r_pin"></span></td>
-                    <td></td>
+                    <td><span class="bold">Date & Time:</span> <span id="r_date"></span></td>
                 </tr>
                 <tr>
                     <td><span class="bold">Age:</span> <span id="r_age"></span></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><span class="bold">Sex:</span> <span id="r_sex"></span></td>
-                    <td></td>
+                    <td><span class="bold">Sex:</span> Female</td>
                 </tr>
             </table>
             <table>
@@ -73,25 +94,79 @@
                 </tr>
                 <tr>
                     <td>LH (Leutinizing Hormone)</td>
-                    <td>40-45</td>
+                    <td><span id="r_lh_value"></span></td>
                     <td>mIU/ml</td>
-                    <td>Normal Menstruating Women: <10<br>Pre-Ovulatory Phase: 10-25<br>LH Surge (Ovulation): 25-40+<br>Luteal Phase: <10</td>
+                    <td>
+                        Normal Menstruating Women: &lt;10<br>
+                        Pre-Ovulatory Phase: 10-25<br>
+                        LH Surge (Ovulation): 25-40+<br>
+                        Luteal Phase: &lt;10
+                    </td>
                 </tr>
             </table>
-            <p><span class="bold">LH % Found:</span> 100%</p>
-            <p><span class="bold">Fertility Level Detected:</span> High</p>
-            <p><span class="bold">Ovulation Prediction:</span> 12-24 Hrs</p>
+            <p><span class="bold">LH % Found:</span> <span id="r_lh_percentage"></span></p>
+            <p><span class="bold">Fertility Level Detected:</span> <span id="fertility_level"></span></p>
+            <p><span class="bold">Ovulation Prediction:</span> <span id="ovulation_prediction"></span></p>
+
+            <button type="button" onclick="downloadPDF()">Download Report</button>
         </div>
     </div>
 
     <script>
         function generateReport() {
-            document.getElementById("r_name").innerText = document.getElementById("name").value;
-            document.getElementById("r_pin").innerText = document.getElementById("pin").value;
-            document.getElementById("r_age").innerText = document.getElementById("age").value;
-            document.getElementById("r_sex").innerText = document.getElementById("sex").value;
-            document.getElementById("report").style.display = "block";
+            const name = document.getElementById("name").value;
+            const age = document.getElementById("age").value;
+            const lhValue = document.getElementById("lh_value").value;
+            const lhPercentage = document.getElementById("lh_percentage").value;
+
+            if (!name || !age || !lhValue || !lhPercentage) {
+                alert("Please fill all fields before generating the report.");
+                return;
+            }
+
+            document.getElementById("r_name").innerText = name;
+            document.getElementById("r_age").innerText = age;
+            document.getElementById("r_lh_value").innerText = lhValue;
+            document.getElementById("r_lh_percentage").innerText = lhPercentage;
+
+            // Set the Date & Time
+            let now = new Date();
+            document.getElementById("r_date").innerText = now.toLocaleString();
+
+            // Determine fertility level and ovulation prediction
+            let fertilityLevel = "Low";
+            let ovulationPrediction = "Not Ovulating";
+            
+            if (lhValue >= 25) {
+                fertilityLevel = "High";
+                ovulationPrediction = "12-24 Hrs";
+            } else if (lhValue >= 10) {
+                fertilityLevel = "Moderate";
+                ovulationPrediction = "Approaching Ovulation";
+            }
+
+            document.getElementById("fertility_level").innerText = fertilityLevel;
+            document.getElementById("ovulation_prediction").innerText = ovulationPrediction;
+
+            // Show the report
+            document.getElementById("report").classList.remove("hidden");
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Capture the report section
+            html2canvas(document.getElementById("report")).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const imgWidth = 190;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                doc.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+                doc.save("Urine_LH_Report.pdf");
+            });
         }
     </script>
 </body>
 </html>
+
