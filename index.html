@@ -1,245 +1,247 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, FileText } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urine LH Sample Quantification Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .patient-details, .date-details {
+            width: 48%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .instructions {
+            background: #e7f3fe;
+            padding: 10px;
+            border-left: 5px solid #2196F3;
+            margin-bottom: 20px;
+        }
+        input, select {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+        .section {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Urine LH Sample Quantification Report</h2>
 
-const LHFertilityReport = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    pinCode: '',
-    age: '',
-    sex: 'Female',
-    lhPercentage: ''
-  });
-
-  const [reportData, setReportData] = useState(null);
-
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }));
-  };
-
-  const generateReport = () => {
-    const { name, address, pinCode, age, sex, lhPercentage } = formData;
-
-    if (!name || !address || !pinCode || !age || !lhPercentage) {
-      alert("Please fill all fields with valid information.");
-      return;
-    }
-
-    const now = new Date();
-    const registeredDate = now.toLocaleString();
-    const collectedDate = now.toLocaleString();
-    const reportedDate = now.toLocaleString();
-
-    // Calculate LH value (assuming 45 mIU/ml = 100%)
-    const lhValue = ((parseFloat(lhPercentage) / 100) * 45).toFixed(2);
-
-    let fertilityLevel = "Low";
-    let ovulationPrediction = "Not Ovulating";
-
-    if (parseFloat(lhPercentage) >= 55) {
-      fertilityLevel = "High";
-      ovulationPrediction = "12-24 Hrs";
-    } else if (parseFloat(lhPercentage) >= 22) {
-      fertilityLevel = "Moderate";
-      ovulationPrediction = "Approaching Ovulation";
-    }
-
-    setReportData({
-      name, address, pinCode, age, sex,
-      registeredDate,
-      collectedDate,
-      reportedDate,
-      lhValue,
-      lhPercentage,
-      fertilityLevel,
-      ovulationPrediction
-    });
-  };
-
-  const downloadReport = () => {
-    if (!reportData) return;
-
-    const reportContent = `
-URINE LH SAMPLE QUANTIFICATION REPORT
-
-Patient Name : ${reportData.name}
-Address : ${reportData.address}
-PIN code : ${reportData.pinCode}
-Age : ${reportData.age}
-Sex : ${reportData.sex}
-
-Date & time
-Registered on: ${reportData.registeredDate}
-Collected on: ${reportData.collectedDate}
-Reported on: ${reportData.reportedDate}
-
-Investigation | Observed Value | Unit | Biological Reference Interval
-LH (Leutinizing Harmone) | ${reportData.lhValue} | mIU/ml | Normal Menstruating Women
-                          |           |        | Follicular Phase <10
-                          |           |        | Pre-Ovulatory Phase 10-25
-                          |           |        | LH Surge (Ovulation) 25-40+
-                          |           |        | Luteal Phase <10
-
-LH % Found : ${reportData.lhPercentage}%
-Fertility Level detected : ${reportData.fertilityLevel}
-Ovulation Prediction : ${reportData.ovulationPrediction}
-
-Interpretation:
-Luteinizing Hormone (LH) is secreted by the anterior pituitary gland and plays a crucial role in ovulation. The urine-based LH test helps detect the LH surge, which triggers ovulation.
-
-Clinical Utility:
-- Ovulation prediction for natural conception or assisted reproduction (IUI, IVF).
-- Menstrual cycle monitoring in irregular periods, PCOS, and ovarian insufficiency.
-- Fertility treatment support to time ovulation induction therapies.
-- At-home, cost-effective alternative to serum LH testing.
-- Levels detection.
-- PCOS (Polycystic Ovary Syndrome) Consistently high LH (>25 mIU/mL) Hormonal imbalance, irregular ovulation
-- Menopause 15-30 mIU/mL (but no surge) Ovarian failure, no ovulation
-- Anovulation (No Ovulation) LH remains low (<10 mIU/mL) Hormonal disorder, stress, excessive exercise
-- To avoid pregnancy chances by hormonal levels.
-
-Caution:
-- Cycle variability: Women with irregular cycles may need to test for several days to detect the LH surge.
-- Not a diagnostic tool: This test is for ovulation tracking only; serum LH testing is recommended for hormonal disorders.
-`;
-
-    const blob = new Blob([reportContent], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'Urine_LH_Report.txt';
-    link.click();
-  };
-
-  return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center">Urine LH Sample Quantification Report</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <Input 
-              id="name" 
-              placeholder="Patient Name" 
-              value={formData.name}
-              onChange={handleInputChange}
-              required 
-            />
-            <Input 
-              id="address" 
-              placeholder="Address" 
-              value={formData.address}
-              onChange={handleInputChange}
-              required 
-            />
-            <Input 
-              id="pinCode" 
-              placeholder="PIN Code" 
-              value={formData.pinCode}
-              onChange={handleInputChange}
-              required 
-            />
-            <Input 
-              id="age" 
-              type="number" 
-              placeholder="Age" 
-              value={formData.age}
-              onChange={handleInputChange}
-              required 
-            />
-            <Select 
-              value={formData.sex}
-              onValueChange={(value) => setFormData(prev => ({...prev, sex: value}))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sex" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Female">Female</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input 
-              id="lhPercentage" 
-              type="number" 
-              placeholder="LH Percentage (%)" 
-              value={formData.lhPercentage}
-              onChange={handleInputChange}
-              required 
-            />
-          </div>
-
-          <Button onClick={generateReport} className="w-full">
-            <FileText className="mr-2" /> Generate Report
-          </Button>
-
-          {reportData && (
-            <div className="mt-4 p-4 bg-white border rounded-lg">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p><strong>Patient Name:</strong> {reportData.name}</p>
-                  <p><strong>Address:</strong> {reportData.address}</p>
-                  <p><strong>PIN Code:</strong> {reportData.pinCode}</p>
-                  <p><strong>Age:</strong> {reportData.age}</p>
-                  <p><strong>Sex:</strong> {reportData.sex}</p>
-                </div>
-                <div className="text-right">
-                  <div className="bg-gray-100 p-2 rounded">
-                    <p><strong>Date & Time</strong></p>
-                    <p>Registered on: {reportData.registeredDate}</p>
-                    <p>Collected on: {reportData.collectedDate}</p>
-                    <p>Reported on: {reportData.reportedDate}</p>
-                  </div>
-                </div>
-              </div>
-
-              <table className="w-full border-collapse border mt-4">
-                <thead>
-                  <tr>
-                    <th className="border p-2">Investigation</th>
-                    <th className="border p-2">Observed Value</th>
-                    <th className="border p-2">Unit</th>
-                    <th className="border p-2">Biological Reference Interval</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border p-2">LH (Leutinizing Harmone)</td>
-                    <td className="border p-2">{reportData.lhValue}</td>
-                    <td className="border p-2">mIU/ml</td>
-                    <td className="border p-2">
-                      Normal Menstruating Women<br />
-                      Follicular Phase &lt;10<br />
-                      Pre-Ovulatory Phase 10-25<br />
-                      LH Surge (Ovulation) 25-40+<br />
-                      Luteal Phase &lt;10
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="mt-4">
-                <p><strong>LH % Found:</strong> {reportData.lhPercentage}%</p>
-                <p><strong>Fertility Level detected:</strong> {reportData.fertilityLevel}</p>
-                <p><strong>Ovulation Prediction:</strong> {reportData.ovulationPrediction}</p>
-              </div>
-
-              <Button onClick={downloadReport} className="mt-4 w-full">
-                <Download className="mr-2" /> Download Report
-              </Button>
-            </div>
-          )}
+        <div class="instructions">
+            <p><strong>Instructions:</strong></p>
+            <ul>
+                <li>Enter patient details carefully</li>
+                <li>Enter LH Percentage</li>
+                <li>Reference Point: 45 mIU/ml = 100%</li>
+                <li>Click "Generate Report" to view detailed results</li>
+            </ul>
         </div>
-      </CardContent>
-    </Card>
-  );
-};
 
-export default LHFertilityReport;
+        <form id="reportForm">
+            <label>Patient Name: <input type="text" id="name" required></label><br>
+            <label>Address: <input type="text" id="address" required></label><br>
+            <label>PIN Code: <input type="text" id="pin_code" required></label><br>
+            <label>Age: <input type="number" id="age" required></label><br>
+            <label>Sex: 
+                <select id="sex" required>
+                    <option value="Female">Female</option>
+                </select>
+            </label><br>
+            <label>LH Percentage (%): <input type="number" id="lh_percentage" placeholder="Enter Percentage" required></label><br>
+            <button type="button" onclick="generateReport()">Generate Report</button>
+        </form>
+
+        <div id="report" class="hidden">
+            <div class="report-header">
+                <div class="patient-details">
+                    <p><strong>Patient Name:</strong> <span id="r_name"></span></p>
+                    <p><strong>Address:</strong> <span id="r_address"></span></p>
+                    <p><strong>PIN Code:</strong> <span id="r_pin_code"></span></p>
+                    <p><strong>Age:</strong> <span id="r_age"></span></p>
+                    <p><strong>Sex:</strong> <span id="r_sex"></span></p>
+                </div>
+                <div class="date-details">
+                    <div class="qr-placeholder">QR Code</div>
+                    <p><strong>Date & Time</strong></p>
+                    <p>Registered on: <span id="r_registered_date"></span></p>
+                    <p>Collected on: <span id="r_collected_date"></span></p>
+                    <p>Reported on: <span id="r_reported_date"></span></p>
+                </div>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Investigation</th>
+                    <th>Observed Value</th>
+                    <th>Unit</th>
+                    <th>Biological Reference Interval</th>
+                </tr>
+                <tr>
+                    <td>LH (Leutinizing Hormone)</td>
+                    <td><span id="r_lh_value"></span></td>
+                    <td>mIU/ml</td>
+                    <td>
+                        Normal Menstruating Women: <10<br>
+                        Follicular Phase <10<br>
+                        Pre-Ovulatory Phase 10-25<br>
+                        LH Surge (Ovulation) 25-40+<br>
+                        Luteal Phase <10
+                    </td>
+                </tr>
+            </table>
+
+            <p><strong>LH % Found:</strong> <span id="r_lh_percentage"></span>%</p>
+            <p><strong>Fertility Level Detected:</strong> <span id="r_fertility_level"></span></p>
+            <p><strong>Ovulation Prediction:</strong> <span id="r_ovulation_prediction"></span></p>
+
+            <div class="section">
+                <h3>Interpretation</h3>
+                <p>Luteinizing Hormone (LH) is secreted by the anterior pituitary gland and plays a crucial role in ovulation. The urine-based LH test helps detect the LH surge, which triggers ovulation.</p>
+            </div>
+
+            <div class="section">
+                <h3>Clinical Utility</h3>
+                <ul>
+                    <li>Ovulation prediction for natural conception or assisted reproduction (IUI, IVF).</li>
+                    <li>Menstrual cycle monitoring in irregular periods, PCOS, and ovarian insufficiency.</li>
+                    <li>Fertility treatment support to time ovulation induction therapies.</li>
+                    <li>At-home, cost-effective alternative to serum LH testing.</li>
+                    <li>Levels detection.</li>
+                    <li>PCOS (Polycystic Ovary Syndrome) Consistently high LH (>25 mIU/mL) Hormonal imbalance, irregular ovulation</li>
+                    <li>Menopause 15-30 mIU/mL (but no surge) Ovarian failure, no ovulation</li>
+                    <li>Anovulation (No Ovulation) LH remains low (<10 mIU/mL) Hormonal disorder, stress, excessive exercise</li>
+                    <li>To avoid pregnancy chances by hormonal levels.</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h3>Caution</h3>
+                <ul>
+                    <li>Cycle variability: Women with irregular cycles may need to test for several days to detect the LH surge.</li>
+                    <li>Not a diagnostic tool: This test is for ovulation tracking only; serum LH testing is recommended for hormonal disorders.</li>
+                </ul>
+            </div>
+
+            <button type="button" onclick="downloadPDF()">Download Report</button>
+        </div>
+    </div>
+
+    <script>
+        function calculateLHValue(percentage) {
+            // Calculate mIU/ml based on percentage of 45
+            const lhValue = (percentage / 100) * 45;
+            return lhValue.toFixed(2);
+        }
+
+        function generateReport() {
+            const name = document.getElementById("name").value;
+            const address = document.getElementById("address").value;
+            const pinCode = document.getElementById("pin_code").value;
+            const age = document.getElementById("age").value;
+            const sex = document.getElementById("sex").value;
+            const lhPercentage = parseFloat(document.getElementById("lh_percentage").value);
+
+            if (!name || !address || !pinCode || !age || isNaN(lhPercentage)) {
+                alert("Please fill all fields with valid information.");
+                return;
+            }
+
+            // Calculate LH Value from Percentage
+            const lhValue = calculateLHValue(lhPercentage);
+
+            // Fill in patient details
+            document.getElementById("r_name").innerText = name;
+            document.getElementById("r_address").innerText = address;
+            document.getElementById("r_pin_code").innerText = pinCode;
+            document.getElementById("r_age").innerText = age;
+            document.getElementById("r_sex").innerText = sex;
+
+            // Set dates
+            const now = new Date();
+            document.getElementById("r_registered_date").innerText = now.toLocaleString();
+            document.getElementById("r_collected_date").innerText = now.toLocaleString();
+            document.getElementById("r_reported_date").innerText = now.toLocaleString();
+
+            // Fill in LH details
+            document.getElementById("r_lh_percentage").innerText = lhPercentage.toFixed(2);
+            document.getElementById("r_lh_value").innerText = lhValue;
+
+            // Determine fertility insights
+            let fertilityLevel = "Low";
+            let ovulationPrediction = "Not Ovulating";
+
+            if (lhPercentage >= 55) {
+                fertilityLevel = "High";
+                ovulationPrediction = "12-24 Hrs";
+            } else if (lhPercentage >= 22) {
+                fertilityLevel = "Moderate";
+                ovulationPrediction = "Approaching Ovulation";
+            }
+
+            document.getElementById("r_fertility_level").innerText = fertilityLevel;
+            document.getElementById("r_ovulation_prediction").innerText = ovulationPrediction;
+
+            // Show the report
+            document.getElementById("report").classList.remove("hidden");
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Capture the report section
+            html2canvas(document.getElementById("report")).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const imgWidth = 190;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                doc.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+                doc.save("Urine_LH_Report.pdf");
+            });
+        }
+    </script>
+</body>
+</html> 
