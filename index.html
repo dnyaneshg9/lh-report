@@ -236,7 +236,8 @@
             const doc = new jsPDF("p", "mm", "a4"); // Use A4 size for better mobile compatibility
 
             // Capture the report section
-            html2canvas(document.getElementById("report"), {
+            html2canvas(document.getElementById("report"), { scale: 2 }).then(canvas => {
+
                 scale: 2, // Increase scale for better quality on mobile
                 useCORS: true, // Handle cross-origin images if any
                 logging: true, // Enable logging for debugging
