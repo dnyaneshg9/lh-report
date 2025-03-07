@@ -64,6 +64,9 @@
             background-color: #f9f9f9;
             border-left: 4px solid #2196F3;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -230,18 +233,23 @@
 
         function downloadPDF() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const doc = new jsPDF("p", "mm", "a4"); // Use A4 size for better mobile compatibility
 
             // Capture the report section
-            html2canvas(document.getElementById("report")).then(canvas => {
+            html2canvas(document.getElementById("report"), {
+                scale: 2, // Increase scale for better quality on mobile
+                useCORS: true, // Handle cross-origin images if any
+                logging: true, // Enable logging for debugging
+            }).then(canvas => {
                 const imgData = canvas.toDataURL("image/png");
-                const imgWidth = 190;
+                const imgWidth = doc.internal.pageSize.getWidth() - 20; // Adjust width to fit the page
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
+                // Add image to PDF
                 doc.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
                 doc.save("Urine_LH_Report.pdf");
             });
         }
     </script>
 </body>
-</html> 
+</html>
